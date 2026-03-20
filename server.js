@@ -51,13 +51,13 @@ app.post("/define", async (req, res) => {
         text: `❓ *"${input}"* was not found in the NexHealth glossary.`,
       });
     }
-  } catch (err) {
+    } catch (err) {
+    console.error('Error fetching glossary:', err.message);
     return res.json({
       response_type: "ephemeral",
-      text: "⚠️ Could not reach the glossary right now. Please try again later.",
+      text: `⚠️ Error: ${err.message}`,
     });
   }
-});
 
 app.get("/", (req, res) => res.send("NexHealth Glossary Bot is running ✅"));
 
