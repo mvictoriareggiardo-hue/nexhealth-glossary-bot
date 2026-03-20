@@ -1,14 +1,8 @@
-const express = require("express");
-const app = express();
-
 const GLOSSARY_URL =
   "https://raw.githubusercontent.com/mvictoriareggiardo-hue/nexhealth-glossary/refs/heads/main/NexHealth_Glossary.json";
 
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-
-app.post("/define", async (req, res) => {
-  const input = (req.body.text || "").trim();
+export default async function handler(req, res) {
+  const input = (req.body?.text || "").trim();
 
   if (!input) {
     return res.json({
@@ -22,10 +16,8 @@ app.post("/define", async (req, res) => {
     const glossary = await response.json();
     const inputLower = input.toLowerCase();
 
-    // Exact match first
     let match = glossary.find((e) => e.term.toLowerCase() === inputLower);
 
-    // Fuzzy fallback
     if (!match) {
       match = glossary.find(
         (e) =>
@@ -59,9 +51,15 @@ app.post("/define", async (req, res) => {
       text: "⚠️ Could not reach the glossary right now. Please try again later.",
     });
   }
-});
+}
+```
 
-app.get("/", (req, res) => res.send("NexHealth Glossary Bot is running ✅"));
+## Steps to Fix
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+1. In your GitHub repo, **create a folder** called `api`
+2. Inside it, **create a new file** called `define.js` and paste the code above
+3. **Delete** the old `server.js` from the root
+4. Go to **Vercel** → your project → it will **auto-redeploy** in ~1 minute
+5. Make sure your Slack slash command Request URL is:
+```
+https://your-vercel-url.vercel.app/api/define
