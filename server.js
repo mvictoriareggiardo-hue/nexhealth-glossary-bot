@@ -9,6 +9,7 @@ app.use(express.json());
 
 app.post("/define", async (req, res) => {
   const input = (req.body.text || "").trim();
+  console.log("Received request, term:", input);
 
   if (!input) {
     return res.json({
@@ -18,10 +19,17 @@ app.post("/define", async (req, res) => {
   }
 
   try {
+    console.log("Fetching glossary...");
     const response = await fetch(GLOSSARY_URL);
-    const glossary = await response.json();
+    console.log("Glossary fetch status:", response.status);
+    
+    const text = await response.text();
+    console.log("Raw response length:", text.length);
+    
+    const glossary = JSON.parse(text);
+    console.log("Parsed terms:", glossary.length);
+    
     const inputLower = input.toLowerCase();
-
     let match = glossary.find((e) => e.term.toLowerCase() === inputLower);
 
     if (!match) {
@@ -51,13 +59,14 @@ app.post("/define", async (req, res) => {
         text: `❓ *"${input}"* was not found in the NexHealth glossary.`,
       });
     }
-    } catch (err) {
-    console.error('Error fetching glossary:', err.message);
+  } catch (err) {
+    console.error("Error:", err.message);
     return res.json({
       response_type: "ephemeral",
       text: `⚠️ Error: ${err.message}`,
     });
   }
+});
 
 app.get("/", (req, res) => res.send("NexHealth Glossary Bot is running ✅"));
 
