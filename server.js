@@ -9,7 +9,6 @@ app.use(express.json());
 
 app.post("/define", async (req, res) => {
   const input = (req.body.text || "").trim();
-  console.log("Received request, term:", input);
 
   if (!input) {
     return res.json({
@@ -19,17 +18,12 @@ app.post("/define", async (req, res) => {
   }
 
   try {
-    console.log("Fetching glossary...");
     const response = await fetch(GLOSSARY_URL);
-    console.log("Glossary fetch status:", response.status);
-    
     const text = await response.text();
-    console.log("Raw response length:", text.length);
-    
-    const glossary = JSON.parse(text);
-    console.log("Parsed terms:", glossary.length);
-    
+    const cleanedText = text.replace(/:\s*NaN/g, ': null');
+    const glossary = JSON.parse(cleanedText);
     const inputLower = input.toLowerCase();
+
     let match = glossary.find((e) => e.term.toLowerCase() === inputLower);
 
     if (!match) {
